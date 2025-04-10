@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+// Use CommonJS require for https-proxy-agent
+// const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const RE_YOUTUBE =
   /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
@@ -51,6 +53,7 @@ export class YoutubeTranscriptNotAvailableLanguageError extends YoutubeTranscrip
 
 export interface TranscriptConfig {
   lang?: string;
+  proxy?: string;
 }
 export interface TranscriptResponse {
   text: string;
@@ -66,21 +69,29 @@ export class YoutubeTranscript {
   /**
    * Fetch transcript from YTB Video
    * @param videoId Video url or video identifier
-   * @param config Get transcript in a specific language ISO
+   * @param config Get transcript in a specific language ISO and optional proxy settings
+   * @param config.lang The language ISO code to retrieve the transcript in
+   * @param config.proxy An HTTP proxy URL to route requests through (e.g., "http://proxy.example.com:8080")
    */
   public static async fetchTranscript(
     videoId: string,
     config?: TranscriptConfig
   ): Promise<TranscriptResponse[]> {
     const identifier = this.retrieveVideoId(videoId);
+    const fetchOptions: any = {
+      headers: {
+        ...(config?.lang && { 'Accept-Language': config.lang }),
+        'User-Agent': USER_AGENT,
+      },
+    };
+    
+    if (config?.proxy) {
+      fetchOptions.agent = new (require('https-proxy-agent'))(config.proxy);
+    }
+    
     const videoPageResponse = await fetch(
       `https://www.youtube.com/watch?v=${identifier}`,
-      {
-        headers: {
-          ...(config?.lang && { 'Accept-Language': config.lang }),
-          'User-Agent': USER_AGENT,
-        },
-      }
+      fetchOptions
     );
     const videoPageBody = await videoPageResponse.text();
 
@@ -140,6 +151,9 @@ export class YoutubeTranscript {
         ...(config?.lang && { 'Accept-Language': config.lang }),
         'User-Agent': USER_AGENT,
       },
+      ...(config?.proxy && { 
+        agent: new (require('https-proxy-agent'))(config.proxy) 
+      }),
     });
     if (!transcriptResponse.ok) {
       throw new YoutubeTranscriptNotAvailableError(videoId);
