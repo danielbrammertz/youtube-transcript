@@ -28,11 +28,11 @@
   "files": [
     "dist/*"
   ],
-  "repository": "https://github.com/Kakulukian/youtube-transcript.git",
+  "repository": "https://github.com/danielbrammertz/youtube-transcript.git",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://github.com/Kakulukian/youtube-transcript",
+  "homepage": "https://github.com/danielbrammertz/youtube-transcript",
   "engines": {
     "node": ">=18.0.0"
   },
