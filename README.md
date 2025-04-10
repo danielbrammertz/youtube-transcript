@@ -15,6 +15,7 @@ This fork adds the following improvements to the original project:
 - Improved error handling and reporting
 - Added a CLI tool for easy transcript retrieval from the command line
 - Added proxy verification to ensure proper connectivity before attempting transcript fetch
+- Added REST API with Swagger documentation for accessing transcripts
 - Better documentation and examples for proxy usage
 
 ## Installation
@@ -71,6 +72,62 @@ node scripts/fetch-transcript.js dQw4w9WgXcQ --proxy http://your-proxy-server:po
 # Fetch transcript from a full YouTube URL
 node scripts/fetch-transcript.js "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --proxy http://your-proxy-server:port
 ```
+
+## REST API
+
+This fork includes a REST API for accessing YouTube transcripts.
+
+### Starting the API
+
+```bash
+# Start the API server
+npm run start
+
+# Development mode with auto-reload
+npm run dev
+```
+
+By default, the API runs on port 3000 and is accessible at http://localhost:3000
+
+### API Documentation
+
+The API includes Swagger documentation available at http://localhost:3000/api-docs
+
+### Authentication
+
+The API can be optionally protected with HTTP Basic Authentication. Set the following environment variables:
+
+- `API_USERNAME`: Username for Basic Auth
+- `API_PASSWORD`: Password for Basic Auth
+
+If these variables are not set, authentication will be disabled.
+
+### Using Proxy with the API
+
+To use a proxy server with the API, set the `PROXY_URL` environment variable.
+
+### Environment Variables
+
+Create a `.env` file in the root directory with the following options:
+
+```
+# API Authentication credentials
+API_USERNAME=admin
+API_PASSWORD=password
+
+# Optional proxy for YouTube requests
+PROXY_URL=http://your-proxy-server:port
+
+# API port
+PORT=3000
+```
+
+### API Endpoints
+
+- `GET /api/transcript/:videoId` - Get transcript for a YouTube video
+  - Parameters:
+    - `videoId` (path) - YouTube video ID or URL
+    - `lang` (query, optional) - Language code for the transcript
 
 ## License
 
