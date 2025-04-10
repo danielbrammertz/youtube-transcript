@@ -1,6 +1,9 @@
 import fetch from 'node-fetch';
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
+// Add IP check endpoint
+const IP_CHECK_URL = 'https://checkip.amazonaws.com';
+
 const RE_YOUTUBE =
   /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
 const USER_AGENT =
@@ -66,6 +69,31 @@ export interface TranscriptResponse {
  */
 export class YoutubeTranscript {
   /**
+   * Check the current IP address, respecting proxy settings if provided
+   * @param proxyUrl Optional proxy URL
+   * @returns The detected IP address
+   */
+  public static async checkIpAddress(proxyUrl?: string): Promise<string> {
+    const fetchOptions: any = {
+      headers: {
+        'User-Agent': USER_AGENT,
+      },
+    };
+    
+    if (proxyUrl) {
+      fetchOptions.agent = new HttpsProxyAgent(proxyUrl);
+    }
+    
+    const response = await fetch(IP_CHECK_URL, fetchOptions);
+    if (!response.ok) {
+      throw new Error(`Failed to check IP address: ${response.statusText}`);
+    }
+    
+    const ip = (await response.text()).trim();
+    return ip;
+  }
+
+  /**
    * Fetch transcript from YTB Video
    * @param videoId Video url or video identifier
    * @param config Get transcript in a specific language ISO and optional proxy settings
@@ -76,6 +104,14 @@ export class YoutubeTranscript {
     videoId: string,
     config?: TranscriptConfig
   ): Promise<TranscriptResponse[]> {
+    // Check and log IP address before making the actual request
+    try {
+      const ip = await this.checkIpAddress(config?.proxy);
+      console.log(`Current IP address: ${ip}`);
+    } catch (error) {
+      console.error(`Failed to check IP address: ${error.message}`);
+    }
+
     const identifier = this.retrieveVideoId(videoId);
     const fetchOptions: any = {
       headers: {

@@ -51,12 +51,10 @@ async function fetchTranscript() {
       console.log(`Fetching transcript for: "${videoId}" (no proxy)`);
     }
     
-    
     try {
       // Try to get the transcript
       console.log('Attempting to fetch transcript...');
       let transcript = await YoutubeTranscript.fetchTranscript(videoId, { proxy: proxyUrl });
-      transcript = transcript[0];
       console.log(JSON.stringify(transcript, null, 2));
       console.log(`Successfully fetched ${transcript.length} transcript segments`);
 
