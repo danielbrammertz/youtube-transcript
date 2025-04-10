@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
-// Use CommonJS require for https-proxy-agent
-// const { HttpsProxyAgent } = require('https-proxy-agent');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const RE_YOUTUBE =
   /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
@@ -86,7 +85,7 @@ export class YoutubeTranscript {
     };
     
     if (config?.proxy) {
-      fetchOptions.agent = new (require('https-proxy-agent'))(config.proxy);
+      fetchOptions.agent = new HttpsProxyAgent(config.proxy);
     }
     
     const videoPageResponse = await fetch(
@@ -146,15 +145,8 @@ export class YoutubeTranscript {
         : captions.captionTracks[0]
     ).baseUrl;
 
-    const transcriptResponse = await fetch(transcriptURL, {
-      headers: {
-        ...(config?.lang && { 'Accept-Language': config.lang }),
-        'User-Agent': USER_AGENT,
-      },
-      ...(config?.proxy && { 
-        agent: new (require('https-proxy-agent'))(config.proxy) 
-      }),
-    });
+    const transcriptResponse = await fetch(transcriptURL, fetchOptions);
+    
     if (!transcriptResponse.ok) {
       throw new YoutubeTranscriptNotAvailableError(videoId);
     }
