@@ -8,7 +8,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c",
-    "transcript": "node scripts/fetch-transcript.js"
+    "transcript": "node scripts/fetch-transcript.js",
+    "check-proxy": "node scripts/check-proxy.js"
   },
   "author": "Kakulukian",
   "keywords": [
