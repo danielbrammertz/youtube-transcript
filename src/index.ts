@@ -108,7 +108,7 @@ export class YoutubeTranscript {
   ): Promise<TranscriptResponse[]> {
     // Check and log IP address before making the actual request
     try {
-      const ip = await this.checkIpAddress(config?.proxy);
+      await this.checkIpAddress(config?.proxy);
     } catch (error) {
       log(`Failed to check IP address: ${error.message}`);
     }
