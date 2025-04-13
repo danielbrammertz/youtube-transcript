@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 const { HttpsProxyAgent } = require('https-proxy-agent');
+import { log } from './utils/logger';
 
 // Add IP check endpoint
 const IP_CHECK_URL = 'https://checkip.amazonaws.com';
@@ -90,6 +91,7 @@ export class YoutubeTranscript {
     }
     
     const ip = (await response.text()).trim();
+    log(`Current IP address: ${ip}`);
     return ip;
   }
 
@@ -107,12 +109,13 @@ export class YoutubeTranscript {
     // Check and log IP address before making the actual request
     try {
       const ip = await this.checkIpAddress(config?.proxy);
-      console.log(`Current IP address: ${ip}`);
     } catch (error) {
-      console.error(`Failed to check IP address: ${error.message}`);
+      log(`Failed to check IP address: ${error.message}`);
     }
 
     const identifier = this.retrieveVideoId(videoId);
+    log(`Retrieving transcript for video ID: ${identifier}`);
+    
     const fetchOptions: any = {
       headers: {
         ...(config?.lang && { 'Accept-Language': config.lang }),
@@ -188,12 +191,15 @@ export class YoutubeTranscript {
     }
     const transcriptBody = await transcriptResponse.text();
     const results = [...transcriptBody.matchAll(RE_XML_TRANSCRIPT)];
-    return results.map((result) => ({
+    const transcriptItems = results.map((result) => ({
       text: result[3],
       duration: parseFloat(result[2]),
       offset: parseFloat(result[1]),
       lang: config?.lang ?? captions.captionTracks[0].languageCode,
     }));
+    
+    log(`Retrieved ${transcriptItems.length} transcript items`);
+    return transcriptItems;
   }
 
   /**
